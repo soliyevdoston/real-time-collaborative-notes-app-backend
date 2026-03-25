@@ -1,0 +1,16 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.commentsRouter = exports.noteCommentsRouter = void 0;
+const express_1 = require("express");
+const auth_1 = require("../../shared/middleware/auth");
+const validate_1 = require("../../shared/middleware/validate");
+const async_handler_1 = require("../../shared/utils/async-handler");
+const comments_schema_1 = require("./comments.schema");
+const comments_controller_1 = require("./comments.controller");
+exports.noteCommentsRouter = (0, express_1.Router)();
+exports.commentsRouter = (0, express_1.Router)();
+exports.noteCommentsRouter.use(auth_1.requireAuth);
+exports.commentsRouter.use(auth_1.requireAuth);
+exports.noteCommentsRouter.get("/:noteId/comments", (0, validate_1.validateParams)(comments_schema_1.noteIdParamSchema), (0, async_handler_1.asyncHandler)(comments_controller_1.commentsController.list));
+exports.noteCommentsRouter.post("/:noteId/comments", (0, validate_1.validateParams)(comments_schema_1.noteIdParamSchema), (0, validate_1.validateBody)(comments_schema_1.createCommentSchema), (0, async_handler_1.asyncHandler)(comments_controller_1.commentsController.create));
+exports.commentsRouter.patch("/:commentId/resolve", (0, validate_1.validateParams)(comments_schema_1.commentIdParamSchema), (0, async_handler_1.asyncHandler)(comments_controller_1.commentsController.resolve));

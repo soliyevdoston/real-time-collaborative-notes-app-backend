@@ -1,0 +1,18 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.authRouter = void 0;
+const express_1 = require("express");
+const async_handler_1 = require("../../shared/utils/async-handler");
+const validate_1 = require("../../shared/middleware/validate");
+const auth_schema_1 = require("./auth.schema");
+const auth_controller_1 = require("./auth.controller");
+const auth_1 = require("../../shared/middleware/auth");
+const upload_1 = require("../../shared/middleware/upload");
+exports.authRouter = (0, express_1.Router)();
+exports.authRouter.post("/register", (0, validate_1.validateBody)(auth_schema_1.registerSchema), (0, async_handler_1.asyncHandler)(auth_controller_1.authController.register));
+exports.authRouter.post("/login", (0, validate_1.validateBody)(auth_schema_1.loginSchema), (0, async_handler_1.asyncHandler)(auth_controller_1.authController.login));
+exports.authRouter.post("/refresh", (0, async_handler_1.asyncHandler)(auth_controller_1.authController.refresh));
+exports.authRouter.post("/logout", (0, async_handler_1.asyncHandler)(auth_controller_1.authController.logout));
+exports.authRouter.get("/me", auth_1.requireAuth, (0, async_handler_1.asyncHandler)(auth_controller_1.authController.me));
+exports.authRouter.patch("/profile", auth_1.requireAuth, (0, validate_1.validateBody)(auth_schema_1.updateProfileSchema), (0, async_handler_1.asyncHandler)(auth_controller_1.authController.updateProfile));
+exports.authRouter.post("/avatar", auth_1.requireAuth, upload_1.uploadAvatar, (0, async_handler_1.asyncHandler)(auth_controller_1.authController.uploadAvatar));

@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.versionsRouter = void 0;
+const express_1 = require("express");
+const auth_1 = require("../../shared/middleware/auth");
+const validate_1 = require("../../shared/middleware/validate");
+const async_handler_1 = require("../../shared/utils/async-handler");
+const versions_schema_1 = require("./versions.schema");
+const versions_controller_1 = require("./versions.controller");
+exports.versionsRouter = (0, express_1.Router)();
+exports.versionsRouter.use(auth_1.requireAuth);
+exports.versionsRouter.get("/:noteId/versions", (0, validate_1.validateParams)(versions_schema_1.noteIdParamSchema), (0, async_handler_1.asyncHandler)(versions_controller_1.versionsController.list));
+exports.versionsRouter.post("/:noteId/versions/:versionId/restore", (0, validate_1.validateParams)(versions_schema_1.restoreVersionParamSchema), (0, async_handler_1.asyncHandler)(versions_controller_1.versionsController.restore));
