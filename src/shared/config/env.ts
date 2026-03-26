@@ -19,8 +19,13 @@ const envSchema = z.object({
 const parsed = envSchema.safeParse(process.env);
 
 if (!parsed.success) {
-  console.error("Muhit o'zgaruvchilari tekshiruvi muvaffaqiyatsiz", parsed.error.flatten().fieldErrors);
-  throw new Error("Muhit konfiguratsiyasi noto'g'ri");
+  const fieldErrors = parsed.error.flatten().fieldErrors;
+  const details = Object.entries(fieldErrors)
+    .map(([key, errors]) => `${key}: ${errors?.join(", ")}`)
+    .join("; ");
+
+  console.error("Muhit o'zgaruvchilari tekshiruvi muvaffaqiyatsiz", fieldErrors);
+  throw new Error(`Muhit konfiguratsiyasi noto'g'ri${details ? `: ${details}` : ""}`);
 }
 
 export const env = parsed.data;
