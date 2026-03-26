@@ -3,12 +3,34 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
 
+const normalizeEnvValue = (value: string | undefined): string | undefined => {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+
+  return trimmed.replace(/^['"]|['"]$/g, "");
+};
+
+const databaseUrl =
+  normalizeEnvValue(process.env["DATABASE_URL"]) ??
+  normalizeEnvValue(process.env["POSTGRES_URL"]) ??
+  normalizeEnvValue(process.env["POSTGRES_PRISMA_URL"]);
+
+if (databaseUrl) {
+  process.env["DATABASE_URL"] = databaseUrl;
+}
+
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    url: databaseUrl,
   },
 });
