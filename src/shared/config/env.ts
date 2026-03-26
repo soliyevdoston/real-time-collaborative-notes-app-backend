@@ -16,6 +16,34 @@ const normalizeEnvValue = (value: string | undefined): string | undefined => {
   return trimmed.replace(/^['"]|['"]$/g, "");
 };
 
+const normalizeNodeEnv = (
+  value: string | undefined,
+): "development" | "test" | "production" | undefined => {
+  const normalized = normalizeEnvValue(value)?.toLowerCase();
+  if (!normalized) {
+    return undefined;
+  }
+
+  if (normalized === "development" || normalized === "test" || normalized === "production") {
+    return normalized;
+  }
+
+  if (normalized.startsWith("prod")) {
+    return "production";
+  }
+
+  if (normalized.startsWith("dev")) {
+    return "development";
+  }
+
+  if (normalized.startsWith("test")) {
+    return "test";
+  }
+
+  // Invalid custom values should not crash production boot.
+  return "production";
+};
+
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().default(4000),
@@ -32,7 +60,7 @@ const envSchema = z.object({
 
 const rawEnv = {
   ...process.env,
-  NODE_ENV: normalizeEnvValue(process.env.NODE_ENV)?.toLowerCase(),
+  NODE_ENV: normalizeNodeEnv(process.env.NODE_ENV),
   FRONTEND_URL: normalizeEnvValue(process.env.FRONTEND_URL),
   FRONTEND_URLS: normalizeEnvValue(process.env.FRONTEND_URLS),
   BACKEND_PUBLIC_URL: normalizeEnvValue(process.env.BACKEND_PUBLIC_URL),
