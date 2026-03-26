@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc -p tsconfig.json",
-    "start": "sh -c 'npm run prisma:deploy || npm run prisma:push; node dist/server.js'",
+    "start": "sh -c '(npm run prisma:deploy || npm run prisma:push) && node dist/server.js'",
     "prisma:deploy": "prisma migrate deploy",
     "prisma:push": "prisma db push",
     "test": "vitest run",
