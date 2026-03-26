@@ -4,6 +4,7 @@ exports.errorHandler = exports.notFoundHandler = void 0;
 const zod_1 = require("zod");
 const client_1 = require("@prisma/client");
 const http_error_1 = require("../errors/http-error");
+const isPrismaErrorCode = (value) => typeof value === "string" && /^P\d{4}$/.test(value);
 const notFoundHandler = (_req, res) => {
     res.status(404).json({ message: "So'ralgan yo'nalish topilmadi" });
 };
@@ -45,7 +46,37 @@ const errorHandler = (err, _req, res, _next) => {
         });
         return;
     }
+    // Some Prisma runtime errors may not pass `instanceof` checks after bundling.
+    if (typeof err === "object" && err !== null) {
+        const maybePrismaError = err;
+        if (isPrismaErrorCode(maybePrismaError.code)) {
+            res.status(500).json({
+                message: "Database xatosi",
+                code: maybePrismaError.code,
+                details: maybePrismaError.meta ?? null,
+            });
+            return;
+        }
+        if (typeof maybePrismaError.name === "string" &&
+            maybePrismaError.name.toLowerCase().includes("prisma")) {
+            res.status(500).json({
+                message: "Database xatosi",
+                code: "PRISMA_RUNTIME_ERROR",
+                details: typeof maybePrismaError.message === "string"
+                    ? maybePrismaError.message
+                    : null,
+            });
+            return;
+        }
+    }
     console.error(err);
-    res.status(500).json({ message: "Server ichki xatosi" });
+    if (err instanceof Error) {
+        res.status(500).json({
+            message: "Server ichki xatosi",
+            details: err.message,
+        });
+        return;
+    }
+    res.status(500).json({ message: "Server ichki xatosi", details: "Noma'lum xatolik" });
 };
 exports.errorHandler = errorHandler;
